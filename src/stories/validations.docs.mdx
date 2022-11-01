@@ -1,0 +1,304 @@
+# Validations
+import { Story, Meta } from "@storybook/addon-docs";
+
+<Meta title="Docs/Validations" />
+
+To use validations, you just need to define in what event the validation will happen and relates the parameters of validation. You can use errorMessages to be shown when the validation of field were false.
+
+There are several validations:
+
+| Key                   | attribute type | Description       |
+|-----------------------|---------|-------------------|
+| [required](#required) | boolean | is required or not|
+| [email](#email)| boolean | matches with email mask|
+| [length](#length)| number | has this lenght |
+| [greaterThan](#greaterthan) | number  | is grater than a value   |
+| [hasNoExtraSpaces](#hasnoextraspaces) | boolean | has no spaces before the first word and after the last one |
+| [isCreditCard](#iscreditcard)   | Array (string) | number should be a credit card number  |
+| [isCreditCardAndLength](#iscreditcardandlength) | Array (string) | number should be a credit card number and should matches the length of it  |
+| [isNumber](#isnumber) | boolean  | is a number  |
+| [lessThan](#lessthan) | number  | number is less than another |
+| [notAllowSpaces](#notallowspaces)     | boolean  | has no spaces in the field |
+| [maxLength](#maxlength)     | number  | max lenght of the field |
+| [notEmpty](#notempty) | boolean  | field is not empty |
+| [numericRange](#numericrange)   | object (start: number end: number) | should be between two numbers |
+| [onlyLetters](#onlyletters) | boolean  | not accept numbers or special chars |
+| [regex](#regex)   | string  | matches a regex |
+| [repeatedNumbers](#repeatednumbers)   | boolean | numbers can't repeate itself in a sequence |
+| [sequentialNumber](#sequentialnumber)| boolean  | numbers can't be sequencial |
+| [url](#url)   | boolean  | matches with url mask  |
+| [value](#value) | string  | This key will hold masks that will run on change  |
+| [isInTheList](#isinthelist) | Array (number or string)  | should belong to an array list of integers or strings|
+
+# required 
+
+```javascript
+ validations: {
+  onChange: {
+    required: true,
+    email: true,
+  },
+},
+errorMessages: {
+  required: 'This field is required',
+},
+```
+# email
+```javascript
+validations: {
+  onChange: {
+    email: true,
+  },
+},
+errorMessages: {
+  email: 'Invalid e-mail',
+},
+``` 
+# length
+```javascript
+validations: {
+  onChange: {
+    length: 4,
+  },
+},
+errorMessages: {
+  length: 'Must have length different of 4',
+},
+```
+
+# greaterThan
+```javascript
+ validations: {
+  onChange: {
+    greaterThan: 4,
+  },
+},
+errorMessages: {
+  greaterThan: 'Must be greater than 4',
+},
+```
+
+# hasNoExtraSpaces
+```javascript
+ validations: {
+  onChange: {
+    hasNoExtraSpaces: true,
+  },
+},
+errorMessages: {
+  hasNoExtraSpaces: 'No extra spaces',
+},
+```
+
+# isCreditCard
+```javascript
+validations: {
+  onChange: {
+    isCreditCard: [
+      'visa',
+      'mastercard',
+      'american-express',
+      'diners-club',
+      'discover',
+      'jcb',
+      'unionpay',
+      'maestro',
+      'mir',
+      'elo',
+      'hiper',
+      'hipercard',
+    ],
+  },
+},
+errorMessages: {
+  isCreditCard: 'Must be a credit card',
+},
+```
+
+# isCreditCardAndLength
+```javascript
+ validations: {
+  onChange: {
+    isCreditCardAndLength: [
+      'visa',
+      'mastercard',
+      'american-express',
+      'diners-club',
+      'discover',
+      'jcb',
+      'unionpay',
+      'maestro',
+      'mir',
+      'elo',
+      'hiper',
+      'hipercard',
+    ],
+  },
+},
+errorMessages: {
+  isCreditCardAndLength: 'Must be a credit card with the correct length type',
+},
+```
+
+# isNumber
+```javascript
+validations: {
+  onChange: {
+    isNumber: true,
+  },
+},
+errorMessages: {
+  isNumber: 'Must be a number',
+},
+```
+
+# lessThan
+```javascript
+validations: {
+  onChange: {
+    isNumber: true,
+    lessThan: 3,
+  },
+},
+errorMessages: {
+  default: 'Must be a number',
+  lessThan: 'Must smaller than 3',
+},
+```
+
+# notAllowSpaces
+```javascript
+ validations: {
+  onChange: {
+    notAllowSpaces: true,
+  },
+},
+errorMessages: {
+  notAllowSpaces: 'Spaces not allowed',
+},
+```
+
+# maxLength
+```javascript
+  validations: {
+  onChange: {
+    maxLength: 3,
+  },
+},
+errorMessages: {
+  maxLength: 'Must smaller than 3',
+},
+```
+
+# notEmpty
+```javascript
+validations: {
+  onChange: {
+    notEmpty: true,
+  },
+},
+errorMessages: {
+  notEmpty: 'No empty values',
+},
+```
+
+# numericRange
+```javascript
+ validations: {
+  onChange: {
+    isNumber: true,
+    numericRange: {
+      start: 1,
+      end: 2,
+    },
+  },
+},
+errorMessages: {
+  default: 'Must be number',
+  numericRange: 'Number must be between 1 and 10',
+},
+```
+
+# onlyLetters
+```javascript
+validations: {
+  onChange: {
+    onlyLetters: true,
+  },
+},
+errorMessages: {
+  onlyLetters: 'Only letters',
+},
+```
+
+# regex
+```javascript
+validations: {
+  onChange: {
+    regex: '[0-9]{3}-[0-9]{3}-[0-9]{4}',
+  },
+},
+errorMessages: {
+  regex: 'Pattern must be 222-222-2222',
+},
+```
+
+# repeatedNumbers
+```javascript
+validations: {
+  onChange: {
+    repeatedNumbers: true,
+  },
+},
+errorMessages: {
+  repeatedNumbers: 'You cant use repeated nums like 22222',
+},
+```
+
+# sequentialNumber
+```javascript
+validations: {
+  onChange: {
+    sequentialNumber: true,
+  },
+},
+errorMessages: {
+  sequentialNumber: 'Numbers cant be sequential like 123',
+},
+```
+
+# url
+```javascript
+  validations: {
+    onChange: {
+      url: true,
+    },
+  },
+  errorMessages: {
+    url: 'Should be URL',
+  },
+```
+
+# value
+```javascript
+ validations: {
+  onChange: {
+    value: 'form-engine',
+  },
+},
+errorMessages: {
+  value: 'Should be form-engine',
+},
+```
+
+# isInTheList
+```javascript
+validations: {
+  onChange: {
+    isInTheList: [1, 2, '3'],
+  },
+},
+errorMessages: {
+  isInTheList: 'Should be in [1, 2, 3]',
+},
+```

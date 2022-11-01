@@ -1,0 +1,247 @@
+# API
+import { Meta } from '@storybook/addon-docs/blocks';
+import { Story } from "@storybook/addon-docs";
+
+<Meta title="Docs/API" />
+
+- [On Mount](#on-mount)
+- [On Blur](#on-blur)
+- [On Change](#on-change)
+- [Update Specific Prop](#update-specific-prop)
+
+
+There's a way to make API calls through of a value of a given field and update the value of another field in the schema and it's even easy to make it.
+Let's see the table of contents below:
+
+| Attr                                                    | Type        | Is Required? | Description                                                    | Example                                                                                               |
+| ------------------------------------------------------- | ----------- | ------------ | -------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| api                                                     | object      | NOT          | Definition of API scope for a given field                      |                                                                                                       |
+| api.method                                              | string      | YES          | Method that will be used when the API is called                | POST, GET, PUT, PATCH                                                                                 |
+| api.headers                                             | HeadersInit | NOT          | Headers for api call                                           | { 'Content-type': 'application/json; charset=UTF-8' }                                                 |
+| api.url                                                 | string      | YES          | URL that the API will send the request                         | 'https://swapi.dev/api/people/1'                                                                      |
+| api.body                                                | object      | NOT          | You can mount your payload here, see more details below\*      | name: 'Maria' **OR** name: '${fields.firstName.value}'                                                |
+| api.onMount                                             | object      | NOT          | When the API will be triggered                                 |                                                                                                       |
+| api.onBlur                                              | object      | NOT          | When the API will be triggered                                 |                                                                                                       |
+| api.onChange                                            | object      | NOT          | When the API will be triggered                                 |                                                                                                       |
+| api.blockRequestWhenInvalid                             | boolean     | NOT          | Avoid the request when field is not valid                      |                                                                                                       |
+
+
+Let's imagine a scenario, we have a zipcode field on our schema and when the "onBlur" event of this input was triggered, we want to make an API call to a given endpoint in order to get the user address and fill with this information another field on your schema.
+For this case we would have a JSON schema like this:
+
+```javascript
+children: [
+  {
+    component: 'text',
+    name: 'zipcode',
+    // ...props
+    // ...validations
+    // ...errorMessages
+    api: {
+      method: 'GET',
+      url: 'https://getzipcode.com/api/',
+      onBlur: true,
+  },
+  {
+    component: 'text',
+    name: 'address',
+    // ...props
+    // ...validations
+    // ...errorMessages
+  },
+],
+```
+
+\*For the body payload you can pass a fixed attribute or dinamically specifying the value of a field that already exists in the component scope.
+For example:
+
+```javascript
+api: {
+  method: 'POST',
+  url: 'https://urlofyourapi.com/api/person/register',
+  body: {
+    name: 'Joana Dark',
+    fullName: 'Joana ${middleName1} ${middleName2} Dark',
+    age: '${fields.age.value}'
+  },
+  onBlur: true,
+},
+```
+
+## API Calls - Changing other properties
+
+In the previous example, we call the API on URL: `https://urlofyourapi.com/api/person/register` and change the value of field **nif** ("fieldName") according to the value of **API response**, using the value of following response object on a given **path**: `response.nif`.
+
+But instead of changing field value, we can also change another property that the given field ("fieldName") has. For example, text input has a `placeholder` property on it, if we want to change its placeholder according to API response, we need to specify this property in `componentPath`. E.g: `componentPath: props.placeholder`.
+
+```javascript
+api: {
+  method: 'POST',
+  url: 'https://urlofyourapi.com/api/person/register',
+  body: {
+    name: 'Joana Dark',
+    fullName: 'Joana ${middleName1} ${middleName2} Dark',
+    age: '${fields.age.value}'
+  },
+  onBlur: true,
+},
+```
+
+> OBS: Do not forget **props.** in **props.placeholder**.
+
+So in this case, we will change `placeholder` of the field **nif** when the API call is **successfully done**.
+
+> OBS: You can change more than one **prop** for the same field by using the same fieldName in another changeField option
+
+```javascript
+api: {
+  ...
+  onBlur: {
+    changeField: [
+      {
+        fieldName: 'nif',
+        componentPath: 'props.placeholder',
+        path: 'nif',
+      },
+      {
+        fieldName: 'nif',
+        componentPath: 'props.label',
+        path: 'nif',
+      },
+    ],
+  },
+},
+```
+
+# On Mount
+When you specify this prop, the api will  be called in on-mount and will do all the configurations you input in the api configs.
+
+```javascript
+{
+  api: {
+    method: 'GET',
+    url: 'https://api.chucknorris.io/jokes/random',
+    onMount: {
+      changeField: [
+        {
+          fieldName: 'chuckJoke',
+          action: 'setFieldData',
+          path: 'value',
+        },
+      ],
+    },
+  },
+  component: 'input',
+  name: 'firstName',
+  props: {...},
+},
+{
+  component: 'input',
+  name: 'chuckJoke',
+  props: {},
+}
+```
+<Story id="form-api-calls--on-mount"/>
+
+# On Blur
+You can call an API on Blur easily using the previous explanations.
+
+In this example we are calling one API when you `blur` the `firstName` field. Then we use the response to update other field value
+
+```javascript
+{
+  api: {
+    method: 'GET',
+    url: 'https://api.chucknorris.io/jokes/random',
+    onBlur: {
+      changeField: [
+        {
+          fieldName: 'chuckJoke',
+          action: 'setFieldData',
+          path: 'value',
+        },
+      ],
+    },
+  },
+  component: 'input',
+  name: 'firstName',
+  props: {...},
+},
+{
+  component: 'input',
+  name: 'chuckJoke',
+  props: {},
+}
+```
+
+<Story id="form-api-calls--on-blur"/>
+
+# On Change
+
+In this example we are doing the same, except that we use on change. So whenever you change the first field an API call will be triggered
+
+```javascript
+{
+  api: {
+    method: 'GET',
+    url: 'https://api.chucknorris.io/jokes/random',
+    onChange: {
+      changeField: [
+        {
+          fieldName: 'chuckJoke',
+          action: 'setFieldData',
+          path: 'value',
+        },
+      ],
+    },
+  },
+  component: 'input',
+  name: 'firstName',
+  props: {...},
+},
+{
+  component: 'input',
+  name: 'chuckJoke',
+  props: {},
+}
+```
+
+<Story id="form-api-calls--on-change"/>
+
+# Update Specific Prop
+
+In this example will update a given prop of another component. Not its value. The target component label.
+
+We can do it like previously `onChange` or `onBlur`. Here we will do it on change.
+
+```javascript
+api: {
+    method: 'GET',
+    url: 'https://api.chucknorris.io/jokes/random',
+    onChange: {
+      changeField: [
+        {
+          fieldName: 'chuckJoke',
+          componentPath: 'props.label'
+          path: 'value',
+        },
+      ],
+    },
+  },
+  component: 'input',
+  name: 'firstName',
+  props: {...},
+},
+{
+  component: 'input',
+  name: 'chuckJoke',
+  props: {
+    label: 'INITIAL VALUE'
+  },
+}
+```
+
+Note that we are not using `actions` anymore, but `componentPath`. Under the hood it will get the target fieldName, the path, and buil the target
+update path like `chuckJoke.props.label`
+
+<Story id="form-api-calls--update-specific-prop"/>

@@ -1,0 +1,77 @@
+# Masks
+
+import { Story, Meta } from '@storybook/addon-docs';
+
+<Meta title="Docs/Masks" />
+
+Sometimes you want to hide a given input. Suppose a case where you are inputting your password, your credit card number, or even your date of birh.
+
+You might want to hide this input you you `blur` the field or when `changing`.
+
+**4242 4242 4242 4242 -> XXXX XXXX XXXX 4242 -> 4242 4242 4242 4242**
+
+This functionality lets you do this. You can type, and ask to form to hide the input data for you based on your own mask
+
+- [Generic](#generic)
+- [Card Number](#card-number)
+- [Hide Card Number](#hide-card-number)
+- [Card Expiration](#card-expiration)
+- [Card Mask](#card-mask)
+- [Currency](#currency)
+
+| Key          | type    | Description                                             |
+| ------------ | ------- | ------------------------------------------------------- |
+| cleanMask | boolean | Indicated the form if it should clear the mask on focus |
+| onBlur       | TMasks  | This key will hold masks that will run on blur          |
+| onChange     | TMasks  | This key will hold masks that will run on change        |
+
+**NOTES**
+
+- The initial value is formatted
+
+# Generic
+
+Specify your own. This method lets you build your mask
+
+In the following example we will mask one date of birth to be `XX/XX/33`. To do that we are configuring one mask
+to put XX from position 1 to position 2 and from position 4 to position 5. The `/` is handled by the `formatters` that is another chapter
+
+```javascript
+masks: {
+    cleanMask: true,
+    onBlur: {
+        generic: [
+        {
+            from: 1,
+            to: 2,
+            mask: 'X',
+        },
+        {
+            from: 4,
+            to: 5,
+            mask: 'X',
+        },
+        ],
+    },
+}
+```
+
+Read the configuration of each generic item
+
+| Key  | type   | Description                                             |
+| ---- | ------ | ------------------------------------------------------- |
+| from | number | The position you want to start masking (non-zero based) |
+| to   | number | The position you want the mask to end (non-zero based)  |
+| mask | string | The value to put in the specified range                 |
+
+**NOTE: The values are not zero base. Position 1, means 1**
+
+<Story id="form-masks--generic" />
+
+# Card Number
+
+# Hide Card Number
+
+# Card Expiration
+
+# Currency

@@ -1,0 +1,223 @@
+# Templating
+
+import { Story, Meta } from '@storybook/addon-docs';
+
+<Meta title="Docs/Templating" />
+
+Form works with `iVars`. Inside the core, it will store some metadata about what you are doing, for example in `fields`, `formatted`, changed fields, blurred etc,
+
+Plus, it allows you to extend that with `iVars` in `<Form />` or in `Schema`. 
+
+Those iVars can be accesses through one templating mechanism specified in the following format `${...}`. This mechanism, allows you to do a lot of dinamic things that can have input
+from the form frontend, form generated json, or from the form own generated iVars.
+
+For default, everytime that a field or iVar change its value, the related template will rehydrate the field or component that are pointing to that scope, but you can avoid this behavior
+by using configs on schema to exclude whaterver field you want.
+
+**You can use templating wherever you want in your component definition**
+
+- [Basic](#basic)
+- [Default Value](#default-value)
+- [Nested Templating](#nested-templating)
+- [Dynamic Templating](#dynamic-templating)
+- [Automatic template update](#automatic-template-update)
+- [With exclude fields config](#with-exclude-fields-config)
+- [Templating on default value](#templating-on-default-value)
+
+# Basic
+
+There are several ways you can use templates. Lets explore the basic one
+
+```javascript
+{
+    component: 'input',
+    name: 'template',
+    effects: {
+    rehydrate: [
+        {
+        fields: ['input'],
+        validations: {
+            required: true,
+        },
+        },
+    ],
+    },
+    props: {
+        name: 'template',
+        id: 'template',
+        label: 'What is your name',
+    },
+},
+{
+    component: 'input',
+    name: 'input',
+    props: {
+        name: 'input',
+        id: 'input',
+        label: 'Hello ${fields.template.value}',
+    },
+},
+```
+
+In the previous example, the first input (`template`) allows you to input (of course) one value. That value will then be internaly stored in form `iVars` in the following structure.
+
+```javascript
+fields: {
+    template: {
+        value: '',
+        errorMessages:'',
+        faildesErrorMessages: [],
+        visible: true,
+        changes: true,
+        ...
+    }
+    ...
+}
+...
+```
+
+Though `templating` you can in other areas of the form, in this example in field names `input`, access the `iVars scope object`. For that you just need through
+specify the path in the scope that you want like in the label prop of the field (`Hello ${fields.template.value}`). 
+
+This will result in The label having the value inserted on the field named template.
+
+You just need to be aware that in template field you need to tell it to `rehydrate` another field (input field)
+
+## Try it
+
+<Story id="form-templating--basic" />
+
+# Default value
+# Nested Templating
+# Dynamic Templating
+
+# Automatic template update
+
+Allows you to register a given field to automatic template update.
+
+Lets say you are using the following field to listen a given template get the value from global namespace on `${global.foo.bar}` and you can dinamically go to `bar` object and get the value
+
+```javascript
+{
+    component: 'input',
+    name: 'destination',
+    props: {
+        name: 'destination',
+        id: 'destination',
+        label: 'Complex Dynamic no default -> ${global.foo.bar.${fields.prop.value}}',
+    },
+},
+```
+
+In this example, you are accessing `${global.foo.bar."WHATEVE IS IN PROP FIELD"}`
+
+For this to work, with non automatic setup you need to specifically tell your `prop` component to `rehydrate` this component when something happens.
+
+Now lets use the magic
+
+```javascript
+{
+    observables: {
+        template: true,
+    },
+    component: 'input',
+    name: 'destination',
+    props: {
+        name: 'destination',
+        id: 'destination',
+        label: 'Complex Dynamic no default -> ${global.foo.bar.${fields.prop.value}}',
+    },
+},
+```
+
+Adding `observables` object with `template` equal to true, will result in this component to listen to changes on the template `scopes` and `scope field`.
+In this example it will listen to
+- `global.foo`
+- `fields.prop`
+
+Wheneve each of those changes, the component is automatically updated for you.
+
+## Try it
+
+# With exclude fields config
+
+Avoid `excluded` fields to rehydrate when the scope changes. 
+
+Lets say you are using the following field to listen a given template get the value from `firstName` field value, and you can do this only at the first render
+
+```javascript
+{
+    component: 'input',
+    name: 'destination',
+    props: {
+        name: 'destination',
+        id: 'destination',
+        label: 'New label will show ${field.firstName.value}',
+    },
+},
+```
+
+If we use this example, every time that the value of `firstName` changes, the label of field `destination` will be updated with that value. So, we can put `destination` in a exclude list
+and this will not happen anymore, just in the first time.
+
+Now lets use the magic
+
+```javascript
+{
+    configs: {
+    observables: {
+      templates: {
+        exclude: ['destination'],
+      },
+    },
+  },
+  components: [
+    {
+      component: '',
+      name: '',
+      children: [
+        {
+          name: '',
+          component: 'formGroup',
+          props: {
+            mb: 1,
+          },
+          children: [
+            component: 'input',
+            name: 'destination',
+            props: {
+                name: 'destination',
+                id: 'destination',
+                label: 'Complex Dynamic no default -> ${global.foo.bar.${fields.prop.value}}',
+            },
+        }
+    }
+},
+```
+
+## Try it
+<Story id="form-templating--using-exclude-on-observables-templating" />
+
+<Story id="form-templating--not-using-exclude-on-observables-templating" />
+
+# Templating on default value
+
+We can use templating on default values too. The logic is the same, just try it.
+
+```javascript
+{
+    component: 'input',
+    name: 'destination',
+    props: {
+        name: 'lastName',
+        id: 'lastName',
+        label: '${api.posts.title||global.someText}',
+        autoComplete: 'nope',
+    },
+},
+```
+I the code above, the label will be filled with api.posts.title response, but, if there's no response or if it were undefined, the label will be filled with global.SomeText `iVar`.
+
+
+## Try it
+<Story id="form-templating--templating-on-default" />

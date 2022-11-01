@@ -1,0 +1,267 @@
+# Effects
+import { Meta } from '@storybook/addon-docs/blocks';
+
+<Meta title="Docs/Effects" />
+
+Effects are the way to say that a given component will perform an operation that will have one effect on other component
+
+- [ClearFields](#clearfields)
+- [Rehydrate](#rehydrate)
+
+
+import { Story } from "@storybook/addon-docs";
+
+## ClearFields
+
+This effect does what is says. Lets you clear another field based on some conditions.
+
+Lets say you want to have a checkbox groupd where only one of them is selected. The logic is, if you check A uncheck B. Thats what you can do like:
+
+```javascript
+{
+        name: 'roofUpdated',
+        effects: {
+            clearFields: {
+                validations: {
+                    value: true,
+                },
+                fields: ['roofNoUpdated'],
+                clearedValue: false,
+            },
+        },
+        component: 'checkbox',
+        props: {...},
+    },
+    {
+        name: 'roofNoUpdated',
+        effects: {
+            clearFields: {
+                validations: {
+                    value: true,
+                },
+                fields: ['roofUpdated'],
+                clearedValue: false,
+            },
+        },
+        component: 'checkbox',
+        props: {...},
+    },
+```
+
+In this example we just created that. `roofUpdated` field will toggle to false `roofNoUpdated` when it is with a valid value specified in the `validations` object.
+
+| Key          | type         | Description                                                                                    |
+|--------------|--------------|------------------------------------------------------------------------------------------------|
+| validations  | TSchemaValidations | The validation that will trigger some field to be cleared                                      |
+| fields       | string[]     | Array fieldNames that will be affected by this clear fields configuration                      |
+| clearedValue | any          | the value that will be send to the fields specified in fields key when the validations are met |
+
+## Example
+
+In this example we have two checkboxes and we will toggle and ensure only one is active. We are using the snipped before.
+
+When you click in `Yes` the form runs one clearFields effect and matches the validations. If the form sees that the checkbox value is true,
+if will put the other field as `false` as stated in `clearValue`
+
+<Story id="form-effect--clear-fields"/>
+
+# Rehydrate
+
+One json is a static file, normally you want to make it dynamic while havin the JSON flexibility.
+
+This functionality lets you `rehydrate` one field on your JSON Schema on a given action. This action will **always run on change**
+
+In the following snipped we are saying to form to, rehydrate lastName field when the firstName required validation is true (when the name exists). 
+
+```javascript
+{
+    effects: {
+        rehydrate: [
+            {
+                validations: {
+                    required: true,
+                },
+                fields: ['lastName'],
+            },
+        ],
+    },
+    component: 'input',
+    name: 'firstName',    
+    props: {...},
+},
+{
+    component: 'input',
+    name: 'lastName',
+    props: {
+        label: 'Last name ${fields.firstName.value||FIRSTNAME}',
+        placeholder: '${fields.firstName.value||FIRSTNAME}',
+    },
+},
+
+```
+
+This is usefull specially when you use **`templating`** and read wha form has in scope. That is the example with `${fields.firstName.value||FIRSTNAME}`. But we will talk about it in another chapter
+
+**NOTE: You can use more than one Rehydration configuration on your component**
+```javascript
+{
+    effects: {
+        rehydrate: [
+            {
+                validations: {
+                    required: true,
+                },
+                fields: ['lastName'],
+            },
+            {
+                validations: {
+                    email: true,
+                },
+                fields: ['otherInput'],
+            },
+        ],
+    },
+    component: 'input',
+    name: 'firstName',    
+    props: {...},
+},
+{
+    validations: {
+      onBlur: {
+        required: true, 
+      },
+    ,
+    component: 'input',
+    name: 'lastName',
+    props: {
+        label: 'Last name ${fields.firstName.value||FIRSTNAME}',
+        placeholder: '${fields.firstName.value||FIRSTNAME}',
+    },
+},
+
+```
+
+We can specify iVars on schema JSON to use whathever we want in json. Example: '${mydropOptions.${fields.mydrop.value||default}}'
+In this JSON, 2 dropdowns will combine values, basically options of dropdown depends of other dropdown value.
+We can specify a default options in case of this dropdown dont have value.
+
+const rehydrateSchema: TSchema = {
+  iVars: {
+    mydropOptions: {
+      default: [
+        {
+          id: 'default1',
+          label: 'Default 1',
+          selected: false,
+        },
+        {
+          id: 'default2',
+          label: 'Default 2',
+          selected: true,
+        },
+      ],
+      id1: [
+        {
+          id: 'option-for-id1_1',
+          label: 'Option for id1 1 Rehydrated',
+        },
+      ],
+      id2: [
+        {
+          id: 'option-for-id2_1',
+          label: 'Option for id2 1 Rehydrated',
+        },
+        {
+          id: 'option-for-id2_2',
+          label: 'Option for id2 2 Rehydrated',
+        },
+      ],
+      id3: [
+        {
+          id: 'option-for-id3_1',
+          label: 'Option for id3 1 Rehydrated',
+        },
+        {
+          id: 'option-for-id3_2',
+          label: 'Option for id3 2 Rehydrated',
+        },
+      ],
+    },
+  },
+  components: [
+    {
+      component: '',
+      name: '',
+      children: [
+        {
+          name: '',
+          component: 'formGroup',
+          children: [
+            {
+              effects: {
+                rehydrate: [
+                  {
+                    validations: {
+                      required: true,
+                    },
+                    fields: ['mydropDestination'],
+                  },
+                ],
+              },
+              component: 'dropdown',
+              name: 'mydrop',
+              props: {
+                name: 'mydrop',
+                id: 'mydrop',
+                label: 'Choose a value to affect next dropdown',
+                options: [
+                  {
+                    id: 'id1',
+                    label: 'Drop ID 1',
+                  },
+                  {
+                    id: 'id2',
+                    label: 'Drop ID 2',
+                    selected: true,
+                  },
+                  {
+                    id: 'id3',
+                    label: 'Drop ID 3',
+                  },
+                ],
+              },
+            },
+            {
+              component: 'dropdown',
+              name: 'mydropDestination',
+              props: {
+                name: 'mydropDestination',
+                id: 'mydropDestination',
+                label: 'Depends on previous selected option',
+                options: '${mydropOptions.${fields.mydrop.value||default}}',
+              },
+            },
+          ],
+        },
+      ],
+    },
+  ],
+};
+
+```
+
+
+
+
+
+| Key                                | type         | Description                                                        |
+|------------------------------------|--------------|-----------------------------------------------------------------|
+| validations                        | TSchemaValidations | The validation that will one or more field rehydration          |
+| fields                             | string[]     | Target fields to be rehydrated                                  |
+
+## Example
+
+This example uses the snippet before. When you change the `firstName` field, it will rehydrate `lastName` and lastName then uses the form
+scope to display data resulting in displaying `firstName` value in its label. 
+
+<Story id="form-effect--rehydrate-fields" />
